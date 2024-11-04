@@ -1,101 +1,122 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
 
+// Merge Sort Function
+const mergeSort = (arr, key, order = "asc") => {
+  if (arr.length <= 1) return arr;
+
+  const middle = Math.floor(arr.length / 2);
+  const left = mergeSort(arr.slice(0, middle), key, order);
+  const right = mergeSort(arr.slice(middle), key, order);
+
+  return merge(left, right, key, order);
+};
+
+const merge = (left, right, key, order) => {
+  let result = [];
+  let compare;
+
+  while (left.length && right.length) {
+    if (order === "asc") {
+      compare = left[0][key] <= right[0][key];
+    } else {
+      compare = left[0][key] >= right[0][key];
+    }
+    if (compare) {
+      result.push(left.shift());
+    } else {
+      result.push(right.shift());
+    }
+  }
+
+  return [...result, ...left, ...right];
+};
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [products, setProducts] = useState([
+    { id: 1, name: "Laptop", price: 1200, dateAdded: new Date("2023-10-01") },
+    { id: 2, name: "Phone", price: 800, dateAdded: new Date("2023-11-02") },
+    { id: 3, name: "Tablet", price: 600, dateAdded: new Date("2023-09-15") },
+  ]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  const [sortParam, setSortParam] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+    dateAdded: "",
+  });
+
+  const handleAddProduct = () => {
+    if (newProduct.name && newProduct.price && newProduct.dateAdded) {
+      setProducts([
+        ...products,
+        {
+          id: products.length + 1,
+          name: newProduct.name,
+          price: parseFloat(newProduct.price),
+          dateAdded: new Date(newProduct.dateAdded),
+        },
+      ]);
+      setNewProduct({ name: "", price: "", dateAdded: "" });
+    }
+  };
+
+  const sortedProducts = mergeSort(products, sortParam, sortOrder);
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Product List</h1>
+
+      <div style={{ marginBottom: "20px" }}>
+        <label>Sort by: </label>
+        <select
+          value={sortParam}
+          onChange={(e) => setSortParam(e.target.value)}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <option value="name">Name</option>
+          <option value="price">Price</option>
+          <option value="dateAdded">Date Added</option>
+        </select>
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+
+      <ul>
+        {sortedProducts.map((product) => (
+          <li key={product.id}>
+            {product.name} - ${product.price} -{" "}
+            {product.dateAdded.toLocaleDateString()}
+          </li>
+        ))}
+      </ul>
+
+      <h2>Add New Product</h2>
+      <input
+        type="text"
+        placeholder="Product Name"
+        value={newProduct.name}
+        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+      />
+      <input
+        type="number"
+        placeholder="Price"
+        value={newProduct.price}
+        onChange={(e) =>
+          setNewProduct({ ...newProduct, price: e.target.value })
+        }
+      />
+      <input
+        type="date"
+        value={newProduct.dateAdded}
+        onChange={(e) =>
+          setNewProduct({ ...newProduct, dateAdded: e.target.value })
+        }
+      />
+      <button onClick={handleAddProduct}>Add Product</button>
     </div>
   );
 }
